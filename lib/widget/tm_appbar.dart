@@ -1,34 +1,66 @@
 import 'package:flutter/material.dart';
+import '../controller/auth_controller.dart';
 import '../utils/app_colors.dart';
 
 class TmAppbar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  const TmAppbar({super.key, required this.title});
+
+  const TmAppbar({
+    super.key,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.PColor,
+      elevation: 0,
+      backgroundColor: AppColors.primaryColor,
+
       leading: Builder(
         builder: (context) => IconButton(
-          icon: Icon(Icons.menu, color: Colors.white),
+          icon: const Icon(Icons.menu_rounded, color: Colors.white),
           onPressed: () {
             Scaffold.of(context).openDrawer();
           },
         ),
       ),
-      title: Text(title, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+
+      titleSpacing: 0,
+
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          Text(
+            AuthController.userData?.email ?? '',
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+
       actions: [
         IconButton(
-          icon: Icon(Icons.search, color: Colors.white),
-          onPressed: () {
-            // TODO: search filter porer step-e add kora jete pare
-          },
+          onPressed: () {},
+          icon: const Icon(
+            Icons.search_rounded,
+            color: Colors.white,
+          ),
         ),
       ],
     );
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

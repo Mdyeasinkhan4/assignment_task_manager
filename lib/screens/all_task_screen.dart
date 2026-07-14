@@ -1,6 +1,7 @@
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
-
+import '../widget/user_header.dart';
 import '../data/model/api_response.dart';
 import '../data/model/task_model.dart';
 import '../data/model/task_status_count_model.dart';
@@ -18,10 +19,6 @@ class AllTaskScreen extends StatefulWidget {
 }
 
 class _AllTaskScreenState extends State<AllTaskScreen> {
-
-  final List<String> filters = ['All', 'New', 'Progress', 'Completed', 'Cancelled'];
-  String selectedFilter = 'All';
-
   List<TaskStatusCountModel> taskCount = [];
   List<TaskModel> tasks = [];
   bool inProgress = false;
@@ -53,35 +50,16 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
 
     List<TaskModel> result = [];
 
-    if (selectedFilter == 'All') {
-      // backend-e ekta 'get all' endpoint nai, tai 4-ta status-er list ek shathe fetch kore merge korlam
-      List<String> statuses = ['New', 'Progress', 'Completed', 'Cancelled'];
+    List<String> statuses = ['New', 'Progress', 'Completed', 'Cancelled'];
 
-      List<ApiResponse> responses = await Future.wait(
-        statuses.map((s) => ApiCaller.getRequest(url: TMUrls.getTaskByStatusURL(s))),
-      );
+    List<ApiResponse> responses = await Future.wait(
+      statuses.map((s) => ApiCaller.getRequest(url: TMUrls.getTaskByStatusURL(s))),
+    );
 
-      for (ApiResponse response in responses) {
-        if (response.isSuccess) {
-          for (Map<String, dynamic> jsonData in (response.responseData['data'])) {
-            result.add(TaskModel.fromJson(jsonData));
-          }
-        }
-      }
-    } else {
-      final ApiResponse response = await ApiCaller.getRequest(
-        url: TMUrls.getTaskByStatusURL(selectedFilter),
-      );
-
+    for (ApiResponse response in responses) {
       if (response.isSuccess) {
         for (Map<String, dynamic> jsonData in (response.responseData['data'])) {
           result.add(TaskModel.fromJson(jsonData));
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(jsonDecode(response.responseData['data']))),
-          );
         }
       }
     }
@@ -112,8 +90,11 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
     return Scaffold(
       body: Column(
         children: [
+          const UserHeader(),
+          
+          // কাউন্ট কার্ডগুলোর প্যাডিং
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0, bottom: 4.0),
             child: SizedBox(
               height: 90,
               child: ListView.separated(
@@ -127,57 +108,41 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
                   );
                   return TaskCountByStatus(title: task.sId.toString(), count: task.sum ?? 0);
                 },
-                separatorBuilder: (context, index) => SizedBox(width: 20),
+                separatorBuilder: (context, index) => const SizedBox(width: 12),
               ),
             ),
           ),
+          
+          // কাউন্ট কার্ড এবং টাস্ক কার্ডগুলোর মাঝখানের ফাঁকা জায়গা (Spacing)
+          const SizedBox(height: 16),
 
-          SizedBox(
-            height: 45,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              itemCount: filters.length,
-              itemBuilder: (context, index) {
-                final filter = filters[index];
-                final isSelected = filter == selectedFilter;
-                return ChoiceChip(
-                  label: Text(filter),
-                  selected: isSelected,
-                  onSelected: (_) {
-                    setState(() { selectedFilter = filter; });
-                    getTasks();
-                  },
-                );
-              },
-              separatorBuilder: (context, index) => SizedBox(width: 8),
-            ),
-          ),
-
-          SizedBox(height: 8),
-
+          // টাস্ক লিস্ট
           Expanded(
             child: inProgress
-                ? Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: tasks.length,
-                    itemBuilder: (context, index) {
-                      final task = tasks[index];
-                      return TaskCard(
-                        taskModel: task,
-                        CardColor: colorForStatus(task.status),
-                        refreshParent: () async { await refreshAll(); },
-                      );
-                    },
+                ? const Center(child: CircularProgressIndicator())
+                : RefreshIndicator(
+                    onRefresh: refreshAll,
+                    child: ListView.builder(
+                      itemCount: tasks.length,
+                      padding: const EdgeInsets.only(bottom: 80), // নিচের ফ্লটিং বাটনের জন্য কিছুটা অতিরিক্ত জায়গা রাখা হলো
+                      itemBuilder: (context, index) {
+                        final task = tasks[index];
+                        return TaskCard(
+                          taskModel: task,
+                          CardColor: colorForStatus(task.status),
+                          refreshParent: () async { await refreshAll(); },
+                        );
+                      },
+                    ),
                   ),
           )
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => AddNewTaskScreen()));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const AddNewTaskScreen()));
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }

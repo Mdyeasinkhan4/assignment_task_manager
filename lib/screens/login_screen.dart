@@ -1,17 +1,14 @@
-import 'dart:convert';
+// lib/screens/login_screen.dart
+import 'package:flutter/material.dart';
 import 'package:assignment_task_manager/controller/auth_controller.dart';
+import 'package:assignment_task_manager/data/model/api_response.dart';
 import 'package:assignment_task_manager/data/model/user_model.dart';
+import 'package:assignment_task_manager/data/service/api_caller.dart';
 import 'package:assignment_task_manager/screens/forget_pass_email_screen.dart';
 import 'package:assignment_task_manager/screens/main_nav_screen.dart';
 import 'package:assignment_task_manager/screens/sign_up_screen.dart';
-import 'package:assignment_task_manager/utils/app_colors.dart';
+import 'package:assignment_task_manager/utils/urls.dart';
 import 'package:assignment_task_manager/widget/screen_bg.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-
-import '../data/model/api_response.dart';
-import '../data/service/api_caller.dart';
-import '../utils/urls.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,105 +18,125 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _inProgress = false;
 
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  Future<void> _login() async {
+    setState(() { _inProgress = true; });
 
-  Future<void>signIn() async {
+    Map<String, dynamic> requestBody = {
+      "email": _emailController.text.trim(),
+      "password": _passwordController.text,
+    };
 
-
-
-
-    final ApiResponse response = await ApiCaller.PostRequest(url: TMUrls.SignInURL,
-        body: {
-          "email":emailController.text,
-          "password":passwordController.text,
-        }
-
+    final ApiResponse response = await ApiCaller.PostRequest(
+      url: TMUrls.SignInURL, // নিশ্চিত করো urls.dart এ এই নাম আছে
+      body: requestBody,
     );
 
+    setState(() { _inProgress = false; });
 
-    if(response.isSuccess){
-      UserModel model = UserModel.fromJson(response.responseData['data']);
+    if (response.isSuccess) {
+      String token = response.responseData['token'];
+      UserModel userModel = UserModel.fromJson(response.responseData['data']);
+      
+      await AuthController.saveUserData(userModel, token);
 
-      String accessToken = response.responseData['token'];
-      AuthController.saveUserData(model, accessToken);
-
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MainNavScreen()));
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sign In success....!')));
-
-
-    }else{
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response.responseData['data'])));
-
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const MainNavScreen()),
+          (route) => false,
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response.errorMessage ?? 'Login failed!')),
+        );
+      }
     }
-  }
-
-
-  void onTapSignUp(){
-    Navigator.push(context, MaterialPageRoute(builder: (context)=>SignUpScreen()));
-  }
-
-  void onTapForgetPassword(){
-    Navigator.push(context, MaterialPageRoute(builder: (context)=>ForgetPassEmailScreen()));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ScreenBG(child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 250,),
-            Text('Get Started With', style: Theme.of(context).textTheme.titleLarge,),
-            SizedBox(height: 25,),
-            TextFormField(
-              controller: emailController,
-              decoration: InputDecoration(
-                hintText: 'Email'
-              ),
-            ),
-            SizedBox(height: 10,),
-
-            TextFormField(
-              controller: passwordController,
-              decoration: InputDecoration(
-                  hintText: 'Password'
-              ),
-            ),
-
-            FilledButton(onPressed: (){
-              signIn();
-            }, child: Icon(Icons.arrow_circle_right_outlined,size: 25,)),
-
-            SizedBox(height: 35,),
-
-            Center(
+      body: ScreenBG(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextButton(onPressed: onTapForgetPassword, child: Text('Forget Password ?',style: TextStyle(color: Colors.grey),)),
-
-                  RichText(text: TextSpan(
-                    text: "Don't have an account? ",style: TextStyle(color: Colors.black,fontWeight: FontWeight.w500),
-                    children: [
-                      TextSpan(
-                        text: 'Sign Up', style: TextStyle(
-                        color: AppColors.PColor,
-                        fontWeight: FontWeight.bold
-                      ),
-                        recognizer: TapGestureRecognizer()..onTap = onTapSignUp
-                      )
-                    ]
-                  ))
+                  const SizedBox(height: 160),
+                  Text('Get Started With', style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(hintText: 'Email'),
+                    validator: (value) => (value == null || value.isEmpty) ? 'Enter email' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(hintText: 'Password'),
+                    validator: (value) => (value == null || value.isEmpty) ? 'Enter password' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  Visibility(
+                    visible: !_inProgress,
+                    replacement: const Center(child: CircularProgressIndicator()),
+                    child: FilledButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) _login();
+                      },
+                      child: const Icon(Icons.arrow_circle_right_outlined, size: 25),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Center(
+                    child: Column(
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const ForgetPassEmailScreen()));
+                          },
+                          child: const Text('Forgot Password?', style: TextStyle(color: Colors.grey)),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("Don't have an account?"),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpScreen())); // নিশ্চিত করো এই স্ক্রিনটি তৈরি আছে
+                              },
+                              child: const Text('Sign up', style: TextStyle(color: Colors.green)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-            )
-
-          ],
+            ),
+          ),
         ),
-      )),
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }

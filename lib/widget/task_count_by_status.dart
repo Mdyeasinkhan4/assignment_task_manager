@@ -1,21 +1,44 @@
+
 import 'package:flutter/material.dart';
+
 class TaskCountByStatus extends StatelessWidget {
   final String title;
   final int count;
 
   const TaskCountByStatus({
-    super.key, required this.title, required this.count,
+    super.key,
+    required this.title,
+    required this.count,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 2,
+      margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15.0,vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center, // বাম থেকে পরিবর্তন করে সেন্টারে আনা হলো
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(count.toString(), style: Theme.of(context).textTheme.titleLarge,),
-            Text(title)
+            Text(
+              '$count',
+              textAlign: TextAlign.center, // নম্বর মাঝখানে দেখানোর জন্য
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              title,
+              textAlign: TextAlign.center, // টেক্সট মাঝখানে দেখানোর জন্য
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
           ],
         ),
       ),
