@@ -5,7 +5,6 @@ class AppColors {
 
   static const Color primaryColor = Color(0xFF21BF73);
 
-  // Old name compatibility
   static const Color PColor = primaryColor;
 
   static const Color backgroundColor = Color(0xFFF8F9FB);
@@ -16,9 +15,9 @@ class AppColors {
 
   static const Color subtitleColor = Color(0xFF6B7280);
 
-  static const Color newTask = Color(0xFF3B82F6);
+  static const Color newTask = Color.fromARGB(255, 22, 105, 240);
 
-  static const Color progressTask = Color(0xFFF59E0B);
+  static const Color progressTask = Color.fromARGB(255, 126, 3, 226);
 
   static const Color completedTask = Color(0xFF10B981);
 

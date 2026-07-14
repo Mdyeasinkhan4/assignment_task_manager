@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../widget/user_header.dart';
@@ -91,8 +90,6 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
       body: Column(
         children: [
           const UserHeader(),
-          
-          // কাউন্ট কার্ডগুলোর প্যাডিং
           Padding(
             padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0, bottom: 4.0),
             child: SizedBox(
@@ -113,10 +110,7 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
             ),
           ),
           
-          // কাউন্ট কার্ড এবং টাস্ক কার্ডগুলোর মাঝখানের ফাঁকা জায়গা (Spacing)
           const SizedBox(height: 16),
-
-          // টাস্ক লিস্ট
           Expanded(
             child: inProgress
                 ? const Center(child: CircularProgressIndicator())
@@ -124,7 +118,7 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
                     onRefresh: refreshAll,
                     child: ListView.builder(
                       itemCount: tasks.length,
-                      padding: const EdgeInsets.only(bottom: 80), // নিচের ফ্লটিং বাটনের জন্য কিছুটা অতিরিক্ত জায়গা রাখা হলো
+                      padding: const EdgeInsets.only(bottom: 80), 
                       itemBuilder: (context, index) {
                         final task = tasks[index];
                         return TaskCard(

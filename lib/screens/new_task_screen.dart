@@ -46,31 +46,11 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
       }
 
       taskC.removeWhere((e)=>e.sId == null);
-      //
-      //
-      // const statusOrder = [
-      //   'New',
-      //   'Progress',
-      //   'Completed',
-      //   'Cancelled'
-      // ];
-      //
-      // taskC.sort((a,b){
-      //   final indexA = statusOrder.indexOf(a.sId ?? '');
-      //   final indexB = statusOrder.indexOf(b.sId ?? '');
-      //
-      //   return (indexA == -1 ? statusOrder.length : indexA)
-      //       .compareTo(indexB == -1 ? statusOrder.length : indexB);
-      //
-      //
-      // });
-
 
     }else{
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(jsonDecode(response.responseData['data']))));
 
     }
-
 
     setState(() {
       taskCount = taskC;

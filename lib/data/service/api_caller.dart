@@ -32,9 +32,9 @@ class ApiCaller {
         return ApiResponse(responseCode: response.statusCode, responseData: data, isSuccess: false, errorMessage: data.toString());
       }
     } on TimeoutException {
-      return ApiResponse(responseCode: -1, responseData: {'data': 'Request timeout, abar try koro'}, isSuccess: false, errorMessage: 'timeout');
+      return ApiResponse(responseCode: -1, responseData: {'data': 'Request timeout, Try Again'}, isSuccess: false, errorMessage: 'timeout');
     } on SocketException {
-      return ApiResponse(responseCode: -1, responseData: {'data': 'Internet connection check koro'}, isSuccess: false, errorMessage: 'no internet');
+      return ApiResponse(responseCode: -1, responseData: {'data': 'Connection Error! Check Internet connection'}, isSuccess: false, errorMessage: 'no internet');
     } catch (e) {
       return ApiResponse(responseCode: -1, responseData: {'data': 'Something went wrong'}, isSuccess: false, errorMessage: e.toString());
     }
@@ -70,9 +70,9 @@ class ApiCaller {
         return ApiResponse(responseCode: response.statusCode, responseData: data, isSuccess: false, errorMessage: data.toString());
       }
     } on TimeoutException {
-      return ApiResponse(responseCode: -1, responseData: {'data': 'Request timeout, abar try koro'}, isSuccess: false, errorMessage: 'timeout');
+      return ApiResponse(responseCode: -1, responseData: {'data': 'Request timeout, Try Again'}, isSuccess: false, errorMessage: 'timeout');
     } on SocketException {
-      return ApiResponse(responseCode: -1, responseData: {'data': 'Internet connection check koro'}, isSuccess: false, errorMessage: 'no internet');
+      return ApiResponse(responseCode: -1, responseData: {'data': 'Error! Check Internet connection'}, isSuccess: false, errorMessage: 'no internet');
     } catch (e) {
       return ApiResponse(responseCode: -1, responseData: {'data': 'Something went wrong'}, isSuccess: false, errorMessage: e.toString());
     }
