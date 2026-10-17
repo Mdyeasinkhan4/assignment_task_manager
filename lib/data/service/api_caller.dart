@@ -77,5 +77,4 @@ class ApiCaller {
       return ApiResponse(responseCode: -1, responseData: {'data': 'Something went wrong'}, isSuccess: false, errorMessage: e.toString());
     }
   }
-
 }
